@@ -9,6 +9,7 @@ chain:
     chainDBPath: "./chain.db"
     trieDBPath: "./trie.db"
     enableFallbackToFreshDb: true
+    enableIndex: true
 
 consensus:
     scheme: "STANDALONE"

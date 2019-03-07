@@ -71,7 +71,7 @@ func newServer(cfg config.Config, testing bool) (*Server, error) {
 	p2pAgent := p2p.NewAgent(cfg.Network, dispatcher.HandleBroadcast, dispatcher.HandleTell)
 	chains := make(map[uint32]*chainservice.ChainService)
 	var cs *chainservice.ChainService
-	genesisConfig, err := genesis.New()
+	genesisConfig := cfg.Genesis
 	if err != nil {
 		return nil, err
 	}
