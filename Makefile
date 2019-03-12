@@ -174,6 +174,10 @@ run:
 docker:
 	$(DOCKERCMD) build -t $(USER)/iotex-core:latest .
 
+.PHONY: ioctl
+ioctl:
+	./cli/ioctl/buildcli.sh
+
 .PHONY: minicluster
 minicluster:
 	$(ECHO_V)rm -rf *chain*.db
