@@ -21,10 +21,10 @@ jobs:
       - checkout
       - run:
           name: install pip
-          command: sudo apt-get install pip
+          command: sudo apt update; sudo apt install python3-pip
       - run:
           name: Install awscli
-          command: sudo pip install awscli
+          command: sudo pip3 install awscli
       # specify any bash command here prefixed with `run: `
       - run:
           name: Deploy to S3
