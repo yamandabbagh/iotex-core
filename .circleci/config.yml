@@ -19,7 +19,9 @@ jobs:
     working_directory: /go/src/github.com/iotexproject/iotex-core
     steps:
       - checkout
-
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
       # specify any bash command here prefixed with `run: `
       - run:
           name: Deploy to S3
