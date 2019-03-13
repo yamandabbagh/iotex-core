@@ -20,6 +20,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install pip
+          command: sudo apt-get install pip
+      - run:
           name: Install awscli
           command: sudo pip install awscli
       # specify any bash command here prefixed with `run: `
