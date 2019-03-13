@@ -21,6 +21,10 @@ jobs:
       - checkout
 
       # specify any bash command here prefixed with `run: `
+      - run:
+          name: Deploy to S3
+          command: aws s3 sync cli s3://ioctl/ --delete
+
       - run: golint -set_exit_status $(go list ./... | grep -v /vendor/ | grep -v /explorer/idl/ | grep -v /api/idl/)
       - run: ./go.test.sh
       - run: bash <(curl -s https://codecov.io/bash)
