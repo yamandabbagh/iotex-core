@@ -8,8 +8,10 @@ package evm
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"math/big"
+	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -565,11 +567,24 @@ func (stateDB *StateDBAdapter) setContractState(addr hash.Hash160, key, value ha
 
 // commitContracts commits contract code to db and update pending contract account changes to trie
 func (stateDB *StateDBAdapter) commitContracts() error {
-	for addr, contract := range stateDB.cachedContract {
+	addrStrs := make([]string, 0)
+	for addr := range stateDB.cachedContract {
+		addrStrs = append(addrStrs, hex.EncodeToString(addr[:]))
+	}
+	sort.Strings(addrStrs)
+
+	for _, addrStr := range addrStrs {
+		var addr hash.Hash160
+		addrBytes, err := hex.DecodeString(addrStr)
+		if err != nil {
+			return errors.Wrap(err, "failed to decode address hash")
+		}
+		copy(addr[:], addrBytes)
 		if _, ok := stateDB.suicided[addr]; ok {
 			// no need to update a suicide account/contract
 			continue
 		}
+		contract := stateDB.cachedContract[addr]
 		if err := contract.Commit(); err != nil {
 			return errors.Wrap(err, "failed to commit contract")
 		}
@@ -580,13 +595,38 @@ func (stateDB *StateDBAdapter) commitContracts() error {
 		}
 	}
 	// delete suicided accounts/contract
+	addrStrs = make([]string, 0)
 	for addr := range stateDB.suicided {
+		addrStrs = append(addrStrs, hex.EncodeToString(addr[:]))
+	}
+	sort.Strings(addrStrs)
+
+	for _, addrStr := range addrStrs {
+		var addr hash.Hash160
+		addrBytes, err := hex.DecodeString(addrStr)
+		if err != nil {
+			return errors.Wrap(err, "failed to decode address hash")
+		}
+		copy(addr[:], addrBytes)
 		if err := stateDB.sm.DelState(addr); err != nil {
 			return errors.Wrapf(err, "failed to delete suicide account/contract %x", addr[:])
 		}
 	}
 	// write preimages to DB
-	for k, v := range stateDB.preimages {
+	addrStrs = make([]string, 0)
+	for addr := range stateDB.preimages {
+		addrStrs = append(addrStrs, hex.EncodeToString(addr[:]))
+	}
+	sort.Strings(addrStrs)
+
+	for _, addrStr := range addrStrs {
+		var k common.Hash
+		addrBytes, err := hex.DecodeString(addrStr)
+		if err != nil {
+			return errors.Wrap(err, "failed to decode address hash")
+		}
+		copy(k[:], addrBytes)
+		v := stateDB.preimages[k]
 		h := make([]byte, len(k))
 		copy(h, k[:])
 		stateDB.cb.Put(PreimageKVNameSpace, h, v, "failed to put hash %x preimage %x", k, v)
